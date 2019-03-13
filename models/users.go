@@ -1,5 +1,7 @@
 package models
 
+import "time"
+
 // User models
 type User struct {
 	IDUser    int
@@ -48,4 +50,38 @@ func FindAllActif() ([]*User, error) {
 		return users, err
 	}
 	return users, nil
+}
+
+// Create a user
+func (user *User) Create() error {
+	// Query
+	insert, err := db.Exec("INSERT INTO users (username, first_name, last_name, actif, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)", user.IDUser, user.FirstName, user.LastName, user.Actif, time.Now(), time.Now())
+	if err != nil {
+		return err
+	}
+	// Get last ID
+	lastID, err := insert.LastInsertId()
+	if err != nil {
+		return err
+	}
+	// assign last id into User
+	user.IDUser = int(lastID)
+
+	// Find the new user
+	if err = user.FindOne(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// Update a user
+func (user *User) Update() error {
+	// Query
+	_, err := db.Exec("UPDATE FROM users SET first_name = ?, last_name = ?, actif = ?, updated_at = ? WHERE id_user = ?", user.FirstName, user.LastName, user.Actif, time.Now(), user.IDUser)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
